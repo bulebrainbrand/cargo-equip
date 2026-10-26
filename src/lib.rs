@@ -631,7 +631,9 @@ pub fn run(opt: Opt, ctx: Context<'_>) -> anyhow::Result<()> {
             .join("");
 
         let crates_available_on_atcoder = iproduct!(libs_to_bundle.keys(), ATCODER_CRATES)
-            .filter(|(id, s)| s.parse::<PkgSpec>().unwrap().matches(&metadata[id]))
+            .filter(|(id, s)| {
+                workspace::pkg_spec_matches(&s.parse::<PkgSpec>().unwrap(), &metadata[id])
+            })
             .map(|(id, _)| format!("- `{}`\n", id))
             .join("");
 

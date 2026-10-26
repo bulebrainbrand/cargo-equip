@@ -374,11 +374,11 @@ impl<'opt> CodeEdit<'opt> {
                         vec![
                             src_path
                                 .with_extension("")
-                                .with_file_name(ident.to_string())
+                                .join(ident.to_string())
                                 .with_extension("rs"),
                             src_path
                                 .with_extension("")
-                                .with_file_name(ident.to_string())
+                                .join(ident.to_string())
                                 .join("mod.rs"),
                         ]
                     };

@@ -189,7 +189,9 @@ pub(crate) fn cargo_check_using_current_lockfile_and_cache(
             .expect("should contain")
             .deps
             .iter()
-            .filter(|cm::NodeDep { pkg, .. }| !exclude.iter().any(|s| s.matches(&metadata[pkg])))
+            .filter(|cm::NodeDep { pkg, .. }| {
+                !exclude.iter().any(|s| pkg_spec_matches(s, &metadata[pkg]))
+            })
             .map(|cm::NodeDep { name, pkg, .. }| {
                 if renames.contains(&name) {
                     name
@@ -426,7 +428,7 @@ impl MetadataExt for cm::Metadata {
         let nodes = nodes.iter().map(|n| (&n.id, n)).collect::<HashMap<_, _>>();
 
         let satisfies = |node_dep: &cm::NodeDep, accepts_dev: bool| -> _ {
-            if exclude.iter().any(|s| s.matches(&self[&node_dep.pkg])) {
+            if exclude.iter().any(|s| pkg_spec_matches(s, &self[&node_dep.pkg])) {
                 return false;
             }
 
@@ -807,4 +809,34 @@ pub(crate) enum ResolveBehavior {
     V1,
     #[serde(rename = "2")]
     V2,
+}
+
+/// `krates::PkgSpec::matches` parses the pre-1.77 `PackageId` format
+/// (`name ver (source)`), so it never matches the current
+/// `registry+url#name@ver` format. Match against `package.source` instead.
+pub(crate) fn pkg_spec_matches(spec: &PkgSpec, package: &cm::Package) -> bool {
+    if spec.name != package.name {
+        return false;
+    }
+    if let Some(version) = &spec.version {
+        if *version != package.version {
+            return false;
+        }
+    }
+    let Some(spec_url) = &spec.url else {
+        return true;
+    };
+    package.source.as_ref().is_some_and(|source| {
+        let mut url = source.repr.as_str();
+        if let Some(i) = url.find('+') {
+            url = &url[i + 1..];
+        }
+        if let Some(i) = url.rfind('#') {
+            url = &url[..i];
+        }
+        if let Some(i) = url.rfind('?') {
+            url = &url[..i];
+        }
+        spec_url == url
+    })
 }
