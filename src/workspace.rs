@@ -718,7 +718,15 @@ impl PackageIdExt for cm::PackageId {
                     s2.chars().map(|_| '█').collect::<String>(),
                 )
             } else {
-                self.repr.clone()
+                // cargo 1.77+: `path+file:///abs/path#name@ver`
+                match self.repr.strip_prefix("path+").and_then(|s| s.split_once('#')) {
+                    Some((path, frag)) => format!(
+                        "path+{}#{}",
+                        path.chars().map(|_| '█').collect::<String>(),
+                        frag,
+                    ),
+                    None => self.repr.clone(),
+                }
             }
         }
     }
