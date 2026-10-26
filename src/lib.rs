@@ -720,13 +720,20 @@ fn bundle(
             let cargo_messages = cargo_check_message_format_json(active_toolchain, shell)?;
             (cargo_messages.clone(), Some(cargo_messages))
         } else {
-            let cargo_messages_for_out_dirs = has_custom_build
-                .then(|| cargo_check_message_format_json(active_toolchain, shell))
-                .unwrap_or_else(|| Ok(Default::default()))?;
+            let cargo_messages_for_out_dirs = if has_custom_build {
+                cargo_check_message_format_json(active_toolchain, shell)?
+            } else {
+                Default::default()
+            };
 
-            let cargo_messages_for_proc_macro_dll_paths = has_proc_macro
-                .then(|| cargo_check_message_format_json(toolchain_for_proc_macro_srv, shell))
-                .transpose()?;
+            let cargo_messages_for_proc_macro_dll_paths = if has_proc_macro {
+                Some(cargo_check_message_format_json(
+                    toolchain_for_proc_macro_srv,
+                    shell,
+                )?)
+            } else {
+                None
+            };
 
             (
                 cargo_messages_for_out_dirs,

@@ -67,7 +67,7 @@ pub(crate) fn find_skip_attribute(code: &str) -> anyhow::Result<bool> {
 }
 
 pub(crate) fn indent_code(code: &str, n: usize) -> String {
-    let is_safe_to_indent = code.parse::<TokenStream>().map_or(false, |token_stream| {
+    let is_safe_to_indent = code.parse::<TokenStream>().is_ok_and(|token_stream| {
         !token_stream.into_iter().any(|tt| {
             matches!(
                 tt, TokenTree::Literal(lit)
@@ -100,7 +100,7 @@ fn replace_ranges(code: &str, replacements: BTreeMap<(LineColumn, LineColumn), S
     while let Some((i, s)) = lines.next() {
         for (j, c) in s.chars().enumerate() {
             if_chain! {
-                if let Some(((start, end), replacement)) = replacements.get(0);
+                if let Some(((start, end), replacement)) = replacements.first();
                 if (i, j) == (start.line - 1, start.column);
                 then {
                     ret += replacement;
@@ -118,7 +118,7 @@ fn replace_ranges(code: &str, replacements: BTreeMap<(LineColumn, LineColumn), S
                 }
             }
         }
-        while let Some(((start, end), replacement)) = replacements.get(0) {
+        while let Some(((start, end), replacement)) = replacements.first() {
             if i == start.line - 1 {
                 ret += replacement;
                 if start < end {

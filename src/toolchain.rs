@@ -57,7 +57,7 @@ pub(crate) fn find_rust_analyzer_proc_macro_srv(
         .join("libexec")
         .join("rust-analyzer-proc-macro-srv")
         .with_extension(env::consts::EXE_EXTENSION)
-        .pipe(AbsPathBuf::assert);
+        .pipe(AbsPathBuf::assert_utf8);
 
     if !Path::new(rust_analyzer_proc_macro_srv.as_os_str()).try_exists()? {
         anyhow::bail!(

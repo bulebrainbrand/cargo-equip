@@ -295,7 +295,7 @@ impl MetadataExt for cm::Metadata {
             &*targets_in_ws(self)
                 .filter(|(t, p)| {
                     (t.is_lib() || t.is_bin() || t.is_example())
-                        && root_package.map_or(true, |r| r.id == p.id)
+                        && root_package.is_none_or(|r| r.id == p.id)
                 })
                 .collect::<Vec<_>>(),
             root_package,
@@ -305,7 +305,7 @@ impl MetadataExt for cm::Metadata {
             }
             ([], None) => bail!("no lib/bin/example target in this workspace"),
             ([t], _) => Ok(*t),
-            ([ts @ ..], _) => bail!(
+            (ts, _) => bail!(
                 "could not determine which target to choose. Use the `--bin` option, `--example` \
                  option, `--lib` option, or `--src` option to specify a target.\n\
                  available targets: {}\n\
@@ -333,7 +333,7 @@ impl MetadataExt for cm::Metadata {
         let root_package = self.root_package();
         match (
             &*targets_in_ws(self)
-                .filter(|(t, p)| t.is_lib() && root_package.map_or(true, |r| r.id == p.id))
+                .filter(|(t, p)| t.is_lib() && root_package.is_none_or(|r| r.id == p.id))
                 .collect::<Vec<_>>(),
             root_package,
         ) {
@@ -444,7 +444,7 @@ impl MetadataExt for cm::Metadata {
                             .and_then(|target| {
                                 cfg_expr::Expression::parse(&target.to_string()).ok()
                             })
-                            .map_or(true, |target| {
+                            .is_none_or(|target| {
                                 target.eval(|pred| match pred {
                                     cfg_expr::Predicate::Feature(feature) => {
                                         features.contains(feature)

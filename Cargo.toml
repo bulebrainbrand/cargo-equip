@@ -27,9 +27,10 @@ petgraph = "0.6.3"
 prettytable-rs = "0.10.0"
 proc-macro2 = { version = "1.0.66", features = ["span-locations"] }
 quote = "1.0.32"
-ra_ap_paths = "=0.0.166"
-ra_ap_proc_macro_api = "=0.0.166"
-ra_ap_tt = "=0.0.166"
+ra_ap_paths = "=0.0.307"
+ra_ap_proc_macro_api = "=0.0.307"
+ra_ap_span = "=0.0.307"
+ra_ap_tt = "=0.0.307"
 rand = "0.8.5"
 rustminify = "0.2.0"
 semver = { version = "1.0.18", features = ["serde"] }

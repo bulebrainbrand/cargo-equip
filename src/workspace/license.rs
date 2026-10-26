@@ -26,7 +26,7 @@ pub(super) fn read_non_unlicense_license_file(
         }
     }
 
-    return read(package, cache_dir).map_err(|causes| {
+    read(package, cache_dir).map_err(|causes| {
         let err = anyhow!(
             "could not read the license file of `{}`.\n\
              note: cargo-equip no longer reads `package.authors` to skip Copyright and License \
@@ -42,17 +42,7 @@ pub(super) fn read_non_unlicense_license_file(
         } else {
             err
         }
-    });
-
-    #[derive(Deserialize, Serialize)]
-    struct Owners {
-        #[serde(rename = "crates.io")]
-        crates_io: BTreeMap<String, BTreeMap<Version, BTreeSet<String>>>,
-        #[serde(rename = "github.com")]
-        github_com: BTreeMap<String, BTreeMap<String, BTreeSet<String>>>,
-        #[serde(rename = "gitlab.com")]
-        gitlab_com: BTreeMap<String, BTreeMap<String, BTreeSet<String>>>,
-    }
+    })
 }
 
 fn users(package: &cm::Package, cache_dir: &Path) -> anyhow::Result<BTreeSet<User>> {
